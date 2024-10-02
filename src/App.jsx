@@ -108,7 +108,7 @@ function StatisticsDisplay({ statistics }) {
   );
 }
 
-function PredictionMode({ userPrediction, setUserPrediction, onPredict }) {
+function PredictionMode({ userPrediction, setUserPrediction, onPredict, predictionFeedback }) {
   return (
     <div className="space-y-2">
       <h3 className="text-lg">Make a Prediction:</h3>
@@ -125,9 +125,15 @@ function PredictionMode({ userPrediction, setUserPrediction, onPredict }) {
       >
         Predict Outcome
       </button>
+      {predictionFeedback && (
+        <div className={`mt-2 text-lg ${isPredictionCorrect ? 'text-green-400' : 'text-red-400'}`}>
+          {predictionFeedback}
+        </div>
+      )}
     </div>
   );
 }
+
 
 function PredictionHistory({ history }) {
   return (
@@ -197,27 +203,35 @@ export default function App() {
   };
 
   const handlePredict = () => {
-    if (result && userPrediction) {
-      const prediction = userPrediction.trim().toLowerCase();
-      const isCorrect =
-        (prediction === 'heads' && result === 'Heads') ||
-        (prediction === 'tails' && result === 'Tails');
-      setHistory((prev) => [...prev, { prediction, result, isCorrect }]);
-
-      if (isCorrect) {
-        setCorrectPredictions((prev) => prev + 1);
-        setPredictionFeedback('Correct prediction!');
-        setIsPredictionCorrect(true);
-      } else {
-        setPredictionFeedback('Wrong prediction! Try again.');
-        setIsPredictionCorrect(false);
-      }
-    } else {
+    if (userPrediction.trim() === '') {
       setPredictionFeedback('Please make a prediction before flipping the coin.');
+      setIsPredictionCorrect(false);
+      return;
+    }
+  
+    const prediction = userPrediction.trim().toLowerCase();
+    if (prediction !== 'heads' && prediction !== 'tails') {
+      setPredictionFeedback('Invalid prediction! Please enter "Heads" or "Tails".');
+      setIsPredictionCorrect(false);
+      return;
+    }
+  
+    const isCorrect =
+      (prediction === 'heads' && result === 'Heads') ||
+      (prediction === 'tails' && result === 'Tails');
+  
+    setHistory((prev) => [...prev, { prediction, result, isCorrect }]);
+  
+    if (isCorrect) {
+      setCorrectPredictions((prev) => prev + 1);
+      setPredictionFeedback('Correct prediction!');
+      setIsPredictionCorrect(true);
+    } else {
+      setPredictionFeedback('Wrong prediction! Try again.');
       setIsPredictionCorrect(false);
     }
   };
-
+  
   const handleStartChallenge = () => {
     const challenge = challenges[Math.floor(Math.random() * challenges.length)];
     setCurrentChallenge(challenge);
@@ -264,6 +278,7 @@ export default function App() {
         setUserPrediction={setUserPrediction}
         onPredict={handlePredict}
         onStartChallenge={handleStartChallenge}
+        predictionFeedback={predictionFeedback}
       />
     </div>
   );
