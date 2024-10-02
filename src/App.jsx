@@ -1,285 +1,272 @@
-import { useState } from 'react';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 
-function CoinFlipCard({
-  onFlip,
-  onReset,
-  statistics,
-  userPrediction,
-  setUserPrediction,
-  onPredict,
-  onBatchFlip,
-  onStartChallenge,
-}) {
-  return (
-    <Card className="max-w-md mx-auto mt-6 p-4 bg-gray-800 text-white">
-      <CardHeader>
-        <CardTitle>Advanced Coin Flip Simulator</CardTitle>
-      </CardHeader>
-      <CardContent className="text-center space-y-4">
-        <CoinFlipAnimation result={statistics.result} />
-        <StatisticsDisplay statistics={statistics} />
-        <StreakDisplay streak={statistics.streak} />
-        <Challenges onStartChallenge={onStartChallenge} currentChallenge={statistics.currentChallenge} />
-        <PredictionMode
-          userPrediction={userPrediction}
-          setUserPrediction={setUserPrediction}
-          onPredict={onPredict}
-        />
-        <PredictionHistory history={statistics.history} />
-        {statistics.predictionFeedback && (
-          <div className={`mt-2 text-lg ${statistics.isPredictionCorrect ? 'text-green-400' : 'text-red-400'}`}>
-            {statistics.predictionFeedback}
-          </div>
-        )}
-      </CardContent>
-      <CardFooter className="flex justify-between space-x-2">
-        <button
-          onClick={onFlip}
-          className="px-4 py-2 bg-[#670962] text-white rounded-lg hover:bg-[#52044b] transition duration-300"
-        >
-          Flip Coin
-        </button>
-        <button
-          onClick={onBatchFlip}
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300"
-        >
-          Flip 10 Coins
-        </button>
-        <button
-          onClick={onReset}
-          className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300"
-        >
-          Reset
-        </button>
-      </CardFooter>
-    </Card>
-  );
-}
+const patternTypes = [
+  "Garter Stitch",
+  "Stockinette Stitch",
+  "Ribbing (K1, P1)",
+  "Ribbing (K2, P2)",
+  "Seed Stitch",
+  "Cable Stitch (C4F)",
+  "Cable Stitch (C6B)",
+  "Basketweave",
+  "Lace (Yarn Over, K2tog)",
+  "Honeycomb Brioche",
+  "Fair Isle",
+  "Chevron",
+  "Feather and Fan",
+  "Twisted Rib",
+  "Double Seed Stitch",
+];
 
-function CoinFlipAnimation({ result }) {
-  return (
-    <div className="coin-animation mb-4 transition-transform duration-500">
-      <div className={`coin ${result ? 'flip-' + result.toLowerCase() : ''}`}>
-        <div className="side heads">Heads</div>
-        <div className="side tails">Tails</div>
-      </div>
-    </div>
-  );
-}
+const yarnThicknesses = ["Light", "Medium", "Bulky"];
 
-function StreakDisplay({ streak }) {
+function PatternPreview({ pattern }) {
   return (
-    <div>
-      <h3 className="text-lg">Longest Streak:</h3>
-      <p className="text-2xl">{streak} {streak > 1 ? 'consecutive flips' : ''}</p>
-    </div>
-  );
-}
-
-function Challenges({ onStartChallenge, currentChallenge }) {
-  return (
-    <div className="mt-4">
-      <h3 className="text-lg">Challenge Mode</h3>
-      <p>Current Challenge: {currentChallenge ? currentChallenge.description : 'None'}</p>
-      <button
-        onClick={onStartChallenge}
-        className="mt-2 px-4 py-2 bg-yellow-500 rounded-lg text-white hover:bg-yellow-600 transition duration-300"
-      >
-        Start a Challenge
-      </button>
-    </div>
-  );
-}
-
-function StatisticsDisplay({ statistics }) {
-  return (
-    <div className="space-y-2">
-      <p>Total Flips: {statistics.totalFlips}</p>
-      <p>Heads: {statistics.heads}</p>
-      <p>Tails: {statistics.tails}</p>
-      <div className="flex items-center">
-        <div className="h-4 bg-green-500 rounded-full" style={{ width: `${statistics.headsProbability * 100}%` }} />
-        <div className="h-4 bg-red-500 rounded-full" style={{ width: `${statistics.tailsProbability * 100}%` }} />
-      </div>
-      <p>Heads Probability: {(statistics.headsProbability * 100).toFixed(2)}%</p>
-      <p>Tails Probability: {(statistics.tailsProbability * 100).toFixed(2)}%</p>
-    </div>
-  );
-}
-
-function PredictionMode({ userPrediction, setUserPrediction, onPredict, predictionFeedback }) {
-  return (
-    <div className="space-y-2">
-      <h3 className="text-lg">Make a Prediction:</h3>
-      <input
-        type="text"
-        value={userPrediction}
-        onChange={(e) => setUserPrediction(e.target.value)}
-        placeholder="Type Heads or Tails"
-        className="px-4 py-2 rounded-lg bg-gray-700 text-white"
-      />
-      <button
-        onClick={onPredict}
-        className="mt-4 px-4 py-2 bg-yellow-500 rounded-lg text-white hover:bg-yellow-600 transition duration-300"
-      >
-        Predict Outcome
-      </button>
-      {predictionFeedback && (
-        <div className={`mt-2 text-lg ${isPredictionCorrect ? 'text-green-400' : 'text-red-400'}`}>
-          {predictionFeedback}
-        </div>
+    <div className="bg-gray-800 p-4 rounded-lg shadow-lg font-mono text-sm overflow-auto max-h-60 transition duration-300 text-white">
+      {pattern ? (
+        pattern.split("\n").map((line, index) => <div key={index}>{line}</div>)
+      ) : (
+        <div className="text-gray-400">No pattern generated yet.</div>
       )}
     </div>
   );
 }
 
+function generatePattern(width, height, patternType, yarnThickness) {
+  let pattern = `Knitting Pattern\nWidth: ${width} stitches\nHeight: ${height} rows\nPattern Type: ${patternType}\nYarn Thickness: ${yarnThickness}\n\n`;
 
-function PredictionHistory({ history }) {
-  return (
-    <div className="mt-4">
-      <h3 className="text-lg">Prediction History:</h3>
-      <ul className="list-disc list-inside">
-        {history.map((item, index) => (
-          <li key={index} className={item.isCorrect ? 'text-green-400' : 'text-red-400'}>
-            {item.prediction} → {item.result} ({item.isCorrect ? 'Correct' : 'Incorrect'})
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
+  for (let row = 1; row <= height; row++) {
+    pattern += `Row ${row}: `;
+    switch (patternType) {
+      case "Garter Stitch":
+        pattern += "Knit all stitches";
+        break;
+      case "Stockinette Stitch":
+        pattern += row % 2 === 1 ? "Knit all stitches" : "Purl all stitches";
+        break;
+      case "Ribbing (K1, P1)":
+        pattern += "*(K1, P1) repeat from * to end";
+        break;
+      case "Ribbing (K2, P2)":
+        pattern += "*(K2, P2) repeat from * to end";
+        break;
+      case "Seed Stitch":
+        pattern +=
+          row % 2 === 1
+            ? "*(K1, P1) repeat from * to end"
+            : "*(P1, K1) repeat from * to end";
+        break;
+      case "Cable Stitch (C4F)":
+        pattern +=
+          row % 4 === 0
+            ? "*(C4F, K4) repeat from * to end"
+            : "Knit all stitches";
+        break;
+      case "Cable Stitch (C6B)":
+        pattern +=
+          row % 6 === 0
+            ? "*(C6B, K6) repeat from * to end"
+            : "Knit all stitches";
+        break;
+      case "Basketweave":
+        pattern +=
+          row % 8 < 4
+            ? "*(K4, P4) repeat from * to end"
+            : "*(P4, K4) repeat from * to end";
+        break;
+      case "Lace (Yarn Over, K2tog)":
+        pattern += "*(YO, K2tog) repeat from * to end";
+        break;
+      case "Honeycomb Brioche":
+        pattern +=
+          row % 2 === 1
+            ? "*(K1, Sl1yo) repeat from * to end"
+            : "*(BRK1, P1) repeat from * to end";
+        break;
+      case "Fair Isle":
+        pattern += "Follow Fair Isle chart for color changes";
+        break;
+      case "Chevron":
+        pattern += "*(K5, K2tog, K5, M1) repeat from * to end";
+        break;
+      case "Feather and Fan":
+        pattern +=
+          row % 4 === 1
+            ? "Knit all stitches"
+            : row % 4 === 2
+            ? "*(K2tog) 3 times, (YO, K1) 6 times, (K2tog) 3 times, repeat from * to end"
+            : row % 4 === 3
+            ? "Purl all stitches"
+            : "Knit all stitches";
+        break;
+      case "Twisted Rib":
+        pattern += "*(K1tbl, P1) repeat from * to end";
+        break;
+      case "Double Seed Stitch":
+        pattern +=
+          row % 4 <= 1
+            ? "*(K2, P2) repeat from * to end"
+            : "*(P2, K2) repeat from * to end";
+        break;
+      default:
+        pattern += "Knit all stitches";
+    }
+    pattern += "\n";
+  }
+
+  return pattern;
 }
 
 export default function App() {
-  const [totalFlips, setTotalFlips] = useState(0);
-  const [heads, setHeads] = useState(0);
-  const [tails, setTails] = useState(0);
-  const [result, setResult] = useState('');
-  const [streak, setStreak] = useState(0);
-  const [currentStreak, setCurrentStreak] = useState(0);
-  const [userPrediction, setUserPrediction] = useState('');
-  const [correctPredictions, setCorrectPredictions] = useState(0);
-  const [currentChallenge, setCurrentChallenge] = useState(null);
-  const [predictionFeedback, setPredictionFeedback] = useState('');
-  const [isPredictionCorrect, setIsPredictionCorrect] = useState(false);
-  const [history, setHistory] = useState([]);
+  const [width, setWidth] = useState("");
+  const [height, setHeight] = useState("");
+  const [patternType, setPatternType] = useState("");
+  const [yarnThickness, setYarnThickness] = useState("");
+  const [pattern, setPattern] = useState("");
 
-  const challenges = [
-    { id: 1, description: 'Flip heads 5 times in a row', target: 5, type: 'Heads' },
-    { id: 2, description: 'Get exactly 3 heads out of 10 flips', target: 3, total: 10 },
-  ];
+  const isFormComplete = width && height && patternType && yarnThickness;
 
-  const handleFlip = () => {
-    const flipResult = Math.random() < 0.5 ? 'Heads' : 'Tails';
-    setResult(flipResult);
-    setTotalFlips((prev) => prev + 1);
-    if (flipResult === 'Heads') {
-      setHeads((prev) => prev + 1);
-      updateStreak(flipResult);
-    } else {
-      setTails((prev) => prev + 1);
-      resetStreak();
+  const handleGenerate = () => {
+    if (isFormComplete) {
+      setPattern(generatePattern(width, height, patternType, yarnThickness));
     }
   };
 
-  const handleBatchFlip = () => {
-    for (let i = 0; i < 10; i++) {
-      handleFlip();
-    }
-  };
-
-  const handleReset = () => {
-    setTotalFlips(0);
-    setHeads(0);
-    setTails(0);
-    setResult('');
-    setStreak(0);
-    setCurrentStreak(0);
-    setUserPrediction('');
-    setCorrectPredictions(0);
-    setPredictionFeedback('');
-    setIsPredictionCorrect(false);
-    setHistory([]);
-  };
-
-  const handlePredict = () => {
-    if (userPrediction.trim() === '') {
-      setPredictionFeedback('Please make a prediction before flipping the coin.');
-      setIsPredictionCorrect(false);
-      return;
-    }
-  
-    const prediction = userPrediction.trim().toLowerCase();
-    if (prediction !== 'heads' && prediction !== 'tails') {
-      setPredictionFeedback('Invalid prediction! Please enter "Heads" or "Tails".');
-      setIsPredictionCorrect(false);
-      return;
-    }
-  
-    const isCorrect =
-      (prediction === 'heads' && result === 'Heads') ||
-      (prediction === 'tails' && result === 'Tails');
-  
-    setHistory((prev) => [...prev, { prediction, result, isCorrect }]);
-  
-    if (isCorrect) {
-      setCorrectPredictions((prev) => prev + 1);
-      setPredictionFeedback('Correct prediction!');
-      setIsPredictionCorrect(true);
-    } else {
-      setPredictionFeedback('Wrong prediction! Try again.');
-      setIsPredictionCorrect(false);
-    }
-  };
-  
-  const handleStartChallenge = () => {
-    const challenge = challenges[Math.floor(Math.random() * challenges.length)];
-    setCurrentChallenge(challenge);
-  };
-
-  const updateStreak = (flipResult) => {
-    if (flipResult === result) {
-      setCurrentStreak((prev) => prev + 1);
-      if (currentStreak + 1 > streak) {
-        setStreak(currentStreak + 1);
-      }
-    } else {
-      resetStreak();
-    }
-  };
-
-  const resetStreak = () => {
-    setCurrentStreak(0);
-  };
-
-  const statistics = {
-    totalFlips,
-    heads,
-    tails,
-    result,
-    headsProbability: totalFlips > 0 ? heads / totalFlips : 0,
-    tailsProbability: totalFlips > 0 ? tails / totalFlips : 0,
-    streak,
-    correctPredictions,
-    currentChallenge,
-    predictionFeedback,
-    isPredictionCorrect,
-    history,
+  const handleDownload = () => {
+    const blob = new Blob([pattern], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "knitting_pattern.txt";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900">
-      <CoinFlipCard
-        onFlip={handleFlip}
-        onBatchFlip={handleBatchFlip}
-        onReset={handleReset}
-        statistics={statistics}
-        userPrediction={userPrediction}
-        setUserPrediction={setUserPrediction}
-        onPredict={handlePredict}
-        onStartChallenge={handleStartChallenge}
-        predictionFeedback={predictionFeedback}
-      />
+    <div className="min-h-screen bg-gray-900 text-white p-6 flex justify-center items-center">
+      <Card className="max-w-2xl w-full shadow-xl rounded-lg bg-gray-800">
+        <CardHeader>
+          <CardTitle
+            className="text-3xl font-semibold text-center"
+            style={{ color: "#670962" }}
+          >
+            Knitting Pattern Generator
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-8 p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div>
+              <Label htmlFor="width" className="text-white">
+                Width (stitches)
+              </Label>
+              <Input
+                id="width"
+                type="number"
+                placeholder="Enter number of stitches"
+                value={width}
+                onChange={(e) => setWidth(e.target.value)}
+                min="1"
+                className="border-gray-600 bg-gray-700 text-white rounded-lg p-2 shadow-sm transition"
+              />
+            </div>
+            <div>
+              <Label htmlFor="height" className="text-white">
+                Height (rows)
+              </Label>
+              <Input
+                id="height"
+                type="number"
+                placeholder="Enter number of rows"
+                value={height}
+                onChange={(e) => setHeight(e.target.value)}
+                min="1"
+                className="border-gray-600 bg-gray-700 text-white rounded-lg p-2 shadow-sm transition"
+              />
+            </div>
+          </div>
+          <div>
+            <Label htmlFor="patternType" className="text-white">
+              Pattern Type
+            </Label>
+            <Select onValueChange={setPatternType}>
+              <SelectTrigger className="w-full border-gray-600 bg-gray-700 text-white rounded-lg p-2 shadow-sm transition">
+                <SelectValue placeholder="Select a pattern type" />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-700 text-white">
+                <SelectGroup>
+                  {patternTypes.map((pattern) => (
+                    <SelectItem key={pattern} value={pattern}>
+                      {pattern}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="yarnThickness" className="text-white">
+              Yarn Thickness
+            </Label>
+            <Select onValueChange={setYarnThickness}>
+              <SelectTrigger className="w-full border-gray-600 bg-gray-700 text-white rounded-lg p-2 shadow-sm transition">
+                <SelectValue placeholder="Select a yarn thickness" />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-700 text-white">
+                <SelectGroup>
+                  {yarnThicknesses.map((thickness) => (
+                    <SelectItem key={thickness} value={thickness}>
+                      {thickness}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Button
+              onClick={handleGenerate}
+              disabled={!isFormComplete}
+              className={`w-full py-3 text-lg font-semibold rounded-lg transition ${
+                isFormComplete
+                  ? "bg-[#670962] text-white hover:bg-purple-700"
+                  : "bg-gray-600 text-gray-400 cursor-not-allowed"
+              }`}
+            >
+              Generate Pattern
+            </Button>
+          </div>
+          <div>
+            <Label className="text-white">Pattern Preview</Label>
+            <PatternPreview pattern={pattern} />
+          </div>
+          {pattern && (
+            <Button
+              onClick={handleDownload}
+              className={`w-full py-3 text-lg font-semibold rounded-lg transition ${
+                isFormComplete
+                  ? "bg-[#670962] text-white hover:bg-purple-700"
+                  : "bg-gray-600 text-gray-400 cursor-not-allowed"
+              }`}
+            >
+              Download Pattern
+            </Button>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
