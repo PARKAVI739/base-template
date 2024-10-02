@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectItem } from "@/components/ui/select";
 
 const MORSE_CODE_DICT = {
   'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.', 'G': '--.', 'H': '....',
@@ -33,7 +33,8 @@ export default function App() {
   const audioContext = useRef(null);
   const oscillator = useRef(null);
   const [playProgress, setPlayProgress] = useState(0);
-  
+  const morseVisual = useRef([]);
+
   useEffect(() => {
     if (!audioContext.current) {
       audioContext.current = new (window.AudioContext || window.webkitAudioContext)();
@@ -107,13 +108,8 @@ export default function App() {
         </CardHeader>
         <CardContent className="space-y-4">
           <Select onValueChange={setMode}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select Mode" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="textToMorse">Text to Morse</SelectItem>
-              <SelectItem value="morseToText">Morse to Text</SelectItem>
-            </SelectContent>
+            <SelectItem value="textToMorse">Text to Morse</SelectItem>
+            <SelectItem value="morseToText">Morse to Text</SelectItem>
           </Select>
           <Input 
             placeholder={mode === 'textToMorse' ? "Enter text here..." : "Enter Morse code here..."}
